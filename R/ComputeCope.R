@@ -136,11 +136,12 @@ ComputeCope = function(Z,level,
   }
   
   #Ignore values not on mask.
-  if(!is.null(mask)){
-    mu_hat[is.na(mask)] = level - 10
-    norm_est[is.na(mask)] <- NA
-   } 
-  
+  #if(!is.null(mask)) beta_hat[,,1][is.na(mask)] = level-10
+  if(is.null(mask)){
+    mask = array(1, dim = dim(beta_hat)[1:2])
+  }else{
+    mask[which(!is.na(mask), arr.ind = TRUE)] = 1
+  }
   
   #Compute a using Multiplier Bootstrap.
   a_MB = quantile(MBContour(x=x, y=y, R=deR, N=N, f=mu_hat, level=level),
