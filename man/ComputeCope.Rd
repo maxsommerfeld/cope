@@ -19,9 +19,9 @@ data. n is the number of observations.}
 \item{X}{The design matrix of the linear model. If NULL, it is set to 
 matrix(rep(1,dim(Y)[3]),ncol=1) corresponding to i.i.d. data.}
 
-\item{w}{Vector of weights. The target function is w^T * beta where beta is 
-the true parameter function. By default the target function is the
-first entry of beta.}
+\item{w}{A vector of length nrow(X) indicating the desired linear combination
+of coefficients to be used in inference, i.e., t(e) %*% coeffs.  If 
+NULL, the default is c(1, rep(0, ncol(X) - 1)).}
 
 \item{correlation}{Type of correlation assumed for the spatially indexed 
 indexed linear models. This is a string that is passed to

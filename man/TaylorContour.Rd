@@ -5,17 +5,14 @@
 \title{Computes tail probabilities of a Gaussian field on a contour with Taylor's 
 method.}
 \usage{
-TaylorContour(x, y, f, level, R)
+TaylorContour(x, y, cont, R)
 }
 \arguments{
 \item{x}{x-Coordinates of the grid on which the data is observed.}
 
 \item{y}{y-Coordinates of the grid on which the data is observed.}
 
-\item{f}{A matrix of dimension c(length(x),length(y)). The contour on which 
-tail probabilities are to be computed is defind as {f=c}.}
-
-\item{level}{The level of the contour.}
+\item{cont}{The contour of f at value level}
 
 \item{R}{An array of dimension c(length(x),length(y),n) containing the 
 realizations of the field.}

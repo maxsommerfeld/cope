@@ -5,7 +5,7 @@
 \title{Computes Multiplier Bootstrap realizations of the supremum of a Gaussian 
 field on a contour.}
 \usage{
-MBContour(x, y, R, f, level, N = 1000)
+MBContour(x, y, R, cont, N = 1000)
 }
 \arguments{
 \item{x}{x-Coordinates of the grid on which the data is observed.}
@@ -15,10 +15,7 @@ MBContour(x, y, R, f, level, N = 1000)
 \item{R}{An array of dimension c(length(x),length(y),n) containing the 
 realizations of the field.}
 
-\item{f}{A matrix of dimension c(length(x),length(y)). The contour on which 
-tail probabilities are to be computed is defind as {f=c}.}
-
-\item{level}{The level of the contour.}
+\item{cont}{The contours of f at value level}
 
 \item{N}{The number of Bootstrap realizations to produce. Default is 1000.}
 }

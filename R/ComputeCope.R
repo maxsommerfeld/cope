@@ -138,26 +138,34 @@ ComputeCope = function(Z,level,
   #Ignore values not on mask.
   #if(!is.null(mask)) beta_hat[,,1][is.na(mask)] = level-10
   if(is.null(mask)){
-    mask = array(1, dim = dim(beta_hat)[1:2])
+    mask = array(1, dim = c(length(x), length(y)))
   }else{
     mask[which(!is.na(mask), arr.ind = TRUE)] = 1
   }
   
+  mu_hat <- mu_hat * mask
+  norm_est <- norm_est * mask
+  if(!is.null(mu)) mu <- mu * mask
+  
+  # Compute contour of estimate.
+  cont <- contourLines(list(x=x,y=y,z=mu_hat),levels=level,nlevels=1)
+  
   #Compute a using Multiplier Bootstrap.
-  a_MB = quantile(MBContour(x=x, y=y, R=deR, N=N, f=mu_hat, level=level),
+  a_MB = quantile(MBContour(x=x, y=y, R=deR, N=N, cont=cont),
                   probs=1-alpha,type=8)
   #Compute a using Taylors method.
-  Tay_fun = TaylorContour(x=x, y=y, f=mu_hat, level=level, R=deR)
+  Tay_fun = TaylorContour(x=x, y=y, cont=cont, R=deR)
   a_Tay = 0
   while(2*Tay_fun(a_Tay)>alpha) a_Tay = a_Tay + 0.01  #The two is for the absolute value.
   
   #Compute threshold a with the true boundary if available.
   if(is.null(mu)) {a_MB_true = NA; a_Tay_true = NA} else{
+    cont_true <- contourLines(list(x=x,y=y,z=mu),levels=level,nlevels=1)
     #Compute a using Multiplier Bootstrap.
-    a_MB_true = quantile(MBContour(x=x,y=y,R=deR,N=N,f=mu,level=level),
+    a_MB_true = quantile(MBContour(x=x,y=y,R=deR,N=N,cont=cont_true),
                          probs=1-alpha,type=8)
     #Compute a using Taylors method.
-    Tay_fun = TaylorContour(x=x,y=y,f=mu,level=level,R=deR) #The two is for the absolute value.
+    Tay_fun = TaylorContour(x=x,y=y,cont=cont_true,R=deR) #The two is for the absolute value.
     a_Tay_true = 0
     while(2*Tay_fun(a_Tay_true)>alpha) a_Tay_true = a_Tay_true + 0.01
   }
