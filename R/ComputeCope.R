@@ -231,3 +231,106 @@ PlotCope = function(cope,plot.taylor=FALSE, use.true.function = FALSE, map=FALSE
     DrawContour(x,y,cope$norm_est,level=-a,col="darkgreen")
   }
 }
+
+
+#' Plots CoPE sets. 
+#'
+#' @param x An object of class cope to be plotted.
+#' @param ... Additional graphical parameters passed to fields::image.plot.
+#' @param taylor  Boolean indicating whether the CoPE sets with the threshold 
+#'                      obtained by Taylor's method should be plotted. Default is
+#'                      FALSE. 
+#' @param use.true.function  Boolean indicating whether the threshold obtained 
+#'                            from the true function should be used. Default is 
+#'                            FALSE.  
+#' @param colc Color of contour line for \eqn{A_c}.
+#' @param lwdc Width of contour line for \eqn{A_c}.
+#' @param ltyc Type of contour line for \eqn{A_c}.
+#' @param colp Color of contour line for \eqn{\hat{A}^{+}_c}.
+#' @param lwdp Width of contour line for \eqn{\hat{A}^{+}_c}.
+#' @param ltyp Type of contour line for \eqn{\hat{A}^{+}_c}.
+#' @param colm Color of contour line for \eqn{\hat{A}^{-}_c}.
+#' @param lwdm Width of contour line for \eqn{\hat{A}^{-}_c}.
+#' @param ltym Type of contour line for \eqn{\hat{A}^{-}_c}.
+#' @param conlist A list of additional arguments to pass to the \code{contour} function.
+#'                By default, the contour labels are not shown.
+#' @import fields
+#' @importFrom graphics plot
+#' @method plot cope
+#' @export
+#' @references M. Sommerfeld, S. Sain and A. Schwartzman. Confidence regions for 
+#'             excursion sets in asymptotically Gaussian
+#'             random fields, with an application to climate. Preprint, 2015. 
+#' @examples
+#' # An example using the ToyNoise and ToySignal of this package.
+#' n = 30
+#' Data = ToyNoise1(n = n)
+#' Data$z = Data$z + rep(ToySignal()$z, n)
+#' CopeSet = compute_cope(Data, level=4/3, mu=ToySignal()$z)
+#' plot(CopeSet)
+
+plot.cope = function(x, ..., taylor = FALSE, use.true.function = FALSE,
+                     colc = "purple", lwdc = 3, ltyc = 1,
+                     colp = "darkred", lwdp = 3, ltyp = 1,
+                     colm = "darkgreen", lwdm = 3, ltym = 1,
+                     conlist = list(drawlabels = FALSE))
+{
+  if(use.true.function & is.null(x$mu)){
+    stop("True function is not available. Estimated boundary will be used.")
+  }
+  
+  # determine whether to use the true contour for Ac.  Otherwise, 
+  # use estimate
+
+  if(use.true.function){
+    if(taylor) a = x$a_Tay_true else a = x$a_MB_true
+    Acz = x$mask*x$mu
+    # fields::image.plot(x, y, x$mask*x$mu_hat, ...)
+    # DrawContour(x,y,x$mu,level=x$level,col="purple")
+    # DrawContour(x,y,x$norm_est,level=a,col="darkred")
+    # DrawContour(x,y,x$norm_est,level=-a,col="darkgreen")
+  } else{
+    if(taylor) a = x$a_Tay else a = x$a_MB
+    #fields::image.plot(x, y, x$mask*x$mu_hat, ...)
+    Acz = x$mask*x$mu_hat
+#     if(!is.null(x$mu)){
+#       DrawContour(x,y,x$mu,level=x$level,col="purple")
+#     } else{
+#       DrawContour(x,y,x$mu_hat,level=x$level,col="purple")
+#     }
+#     DrawContour(x,y,x$norm_est,level=a,col="darkred")
+#     DrawContour(x,y,x$norm_est,level=-a,col="darkgreen")
+  }
+#   
+#   
+#     
+#   if(use.true.function)
+#   {
+#     Acz = x$mask*x$mu 
+#     if(taylor) a = x$a_Tay_true else a = x$a_MB_true
+#   }else
+#   {
+#     Acz = x$mask*x$mu_hat
+#     if(taylor) a = x$a_Tay else a = x$a_MB
+#   }
+  
+  # collect arguments for various contours (Ac, Ac+, Ac-)
+  cAcz = Acz
+  if(!is.null(x$mu)) cAcz = x$mu # determine whether true or 
+                                 # estimated contour should be used
+  argc = c(list(x = x$x, y = x$y, z = cAcz, level = x$level,
+              col = colc, lwd = lwdc, lty = ltyc, add = TRUE),
+              conlist)
+  argp = c(list(x = x$x, y = x$y, z = x$norm_est, level = a,
+                col = colp, lwd = lwdp, lty = ltyp, add = TRUE),
+                conlist)
+  argm = c(list(x = x$x, y = x$y, z = x$norm_est, level = -a,
+                col = colm, lwd = lwdm, lty = ltym, add = TRUE),
+                conlist)
+  
+  # plot image plot of Acz, and relevant contours
+  fields::image.plot(x = x$x, y = x$y, Acz, ...)
+  do.call(contour, argc)
+  do.call(contour, argp)
+  do.call(contour, argm)  
+}
