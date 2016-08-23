@@ -1,8 +1,8 @@
 Package: cope
 Type: Package
 Title: Coverage Probability Excursion (CoPE) Sets
-Version: 0.2
-Date: 2016-03-21
+Version: 0.2.1
+Date: 2016-07-21
 Imports:
     abind (>= 1.4-3),
     fields (>= 7.1),

@@ -5,8 +5,8 @@
 \title{Compute CoPE sets.}
 \usage{
 ComputeCope(Z, level, X = NULL, w = NULL, correlation = NULL,
-  corpar = NULL, groups = NULL, alpha = 0.1, N = 1000, mu = NULL,
-  mask = NULL)
+  corpar = NULL, groups = NULL, V = NULL, alpha = 0.1, N = 1000,
+  mu = NULL, mask = NULL)
 }
 \arguments{
 \item{Z}{A list with components "x", "y" and "z". Here, x and y are the 
@@ -20,7 +20,7 @@ data. n is the number of observations.}
 matrix(rep(1,dim(Y)[3]),ncol=1) corresponding to i.i.d. data.}
 
 \item{w}{A vector of length nrow(X) indicating the desired linear combination
-of coefficients to be used in inference, i.e., t(e) %*% coeffs.  If 
+of coefficients to be used in inference, i.e., t(w) %*% coeffs.  If 
 NULL, the default is c(1, rep(0, ncol(X) - 1)).}
 
 \item{correlation}{Type of correlation assumed for the spatially indexed 
@@ -30,6 +30,10 @@ which corresponds to i.i.d. errors.}
 
 \item{corpar}{A list of parameters passed to the correlation function.}
 
+\item{groups}{A factor vector describing groups that are used in the \code{correlation} function.  Should have the same length as \code{X}.}
+
+\item{V}{A 4-dimensional array containing the covariance matrix associated with each element of \code{Z$z}.  See Details.}
+
 \item{alpha}{The significance level. Inclusion for CoPE sets holds with 
 probability 1-alpha.}
 
@@ -38,7 +42,7 @@ the threshold.}
 
 \item{mu}{The true parameter function. Use the default NULL if unknown.}
 
-\item{mask}{Pixels outside the mask (i.e. where mask is ==NA) are ignored.}
+\item{mask}{Pixels outside the mask (i.e. where mask is == NA) are ignored.}
 }
 \value{
 An object of class cope. A list containing the following
@@ -60,6 +64,9 @@ An object of class cope. A list containing the following
 \description{
 Computes CoPE sets for the data Y using the algorithm from Sommerfeld, Sain
 and Schwartzman (2015).
+}
+\details{
+The \code{V} argument is a 4-dimensional array containing the covariance matrices associated with \code{Z$z}.  Specifically, \code{V[i,j,,]} is the covariance matrix of the data in \code{Z$z[i,j,]}.  If \code{V} is specified, then the covariance matrix in each element of the array is used to transform \code{X} and the appropriate element of \code{Z$z} before fitting the linear model.  This is used in place of estimating the covariance matrix withing the \code{nlme::gls} function.
 }
 \examples{
 # An example using the ToyNoise and ToySignal of this package.

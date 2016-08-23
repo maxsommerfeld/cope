@@ -51,7 +51,7 @@ Plots CoPE sets.
 n = 30
 Data = ToyNoise1(n = n)
 Data$z = Data$z + rep(ToySignal()$z, n)
-CopeSet = compute_cope(Data, level=4/3, mu=ToySignal()$z)
+CopeSet = ComputeCope(Data, level=4/3, mu=ToySignal()$z)
 plot(CopeSet)
 }
 \references{

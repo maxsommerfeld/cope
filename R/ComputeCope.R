@@ -2,6 +2,8 @@
 #' 
 #' Computes CoPE sets for the data Y using the algorithm from Sommerfeld, Sain
 #' and Schwartzman (2015).
+#' 
+#' The \code{V} argument is a 4-dimensional array containing the covariance matrices associated with \code{Z$z}.  Specifically, \code{V[i,j,,]} is the covariance matrix of the data in \code{Z$z[i,j,]}.  If \code{V} is specified, then the covariance matrix in each element of the array is used to transform \code{X} and the appropriate element of \code{Z$z} before fitting the linear model.  This is used in place of estimating the covariance matrix withing the \code{nlme::gls} function.   
 #'
 #' @param Z A list with components "x", "y" and "z". Here, x and y are the 
 #'          coordinates of the grid on which the data is observed and z is an 
@@ -11,19 +13,21 @@
 #' @param X The design matrix of the linear model. If NULL, it is set to 
 #'          matrix(rep(1,dim(Y)[3]),ncol=1) corresponding to i.i.d. data.
 #' @param w A vector of length nrow(X) indicating the desired linear combination
-#'          of coefficients to be used in inference, i.e., t(e) %*% coeffs.  If 
+#'          of coefficients to be used in inference, i.e., t(w) %*% coeffs.  If 
 #'          NULL, the default is c(1, rep(0, ncol(X) - 1)).
 #' @param correlation Type of correlation assumed for the spatially indexed 
 #'                    indexed linear models. This is a string that is passed to
 #'                    the function gls from the nlme package. Defaults to NULL 
 #'                    which corresponds to i.i.d. errors.
 #' @param corpar A list of parameters passed to the correlation function.
+#' @param groups A factor vector describing groups that are used in the \code{correlation} function.  Should have the same length as \code{X}.
+#' @param V A 4-dimensional array containing the covariance matrix associated with each element of \code{Z$z}.  See Details.
 #' @param alpha The significance level. Inclusion for CoPE sets holds with 
 #'              probability 1-alpha.
 #' @param N The number of bootstrap realizations to generate for determining
 #'          the threshold.
 #' @param mu The true parameter function. Use the default NULL if unknown. 
-#' @param mask Pixels outside the mask (i.e. where mask is ==NA) are ignored.
+#' @param mask Pixels outside the mask (i.e. where mask is == NA) are ignored.
 #'   
 #' @return An object of class cope. A list containing the following
 #' \itemize{
@@ -54,12 +58,13 @@
 #' Data$z = Data$z + rep(ToySignal()$z, n)
 #' CopeSet = ComputeCope(Data,level=4/3, mu=ToySignal()$z)
 #' PlotCope(CopeSet)
-ComputeCope = function(Z,level,
+ComputeCope = function(Z, level,
                 X=NULL,
                 w = NULL,
                 correlation = NULL,
                 corpar = NULL,
                 groups = NULL,
+                V = NULL,
                 alpha=0.1,
                 N=1000,
                 mu=NULL,
@@ -96,43 +101,62 @@ ComputeCope = function(Z,level,
   norm_est <- matrix(0, length(x), length(y)) # Normalized estimator.
   mu_hat <- matrix(0, length(x), length(y)) # Estimate of the function of 
                                             # interest.
+  if(!is.null(correlation)) correlation = do.call(get(correlation), c(corpar, form = ~1|groups))
   
-  for(i in 1:length(x)){
-    for(j in 1:length(y)){
-      ytemp <- Y[i, j, ]
-      df <- data.frame(cbind(ytemp = ytemp, X, groups = groups))
-      df <- df[order(groups), ]
-      groups <- sort(groups)
-      
-      fo <- paste(names(df)[1], "~", 
-                  paste(names(df)[-c(1, p + 2)], collapse=" + "), "-1")
-      
-      if(is.null(correlation)){
-       model <- nlme::gls(formula(fo), data = df)       
+  for (i in 1:length(x)) {
+    for (j in 1:length(y)) {
+      ytemp <- Y[i, j,]
+      if (sum(is.na(ytemp)) == length(ytemp)) { # deal with problem if ytemp is all NAs
+        mu_hat[i,j] = NA
+        norm_est[i,j] = NA
       }else{
-       model <- nlme::gls(formula(fo), data = df,  
-                          correlation = do.call(get(correlation),  
-                                                c(corpar, form = ~1|groups)))       
+        df <- data.frame(cbind(ytemp = ytemp, X, groups = groups))
+        df <- df[order(groups),]
+        groups <- sort(groups)
+        
+        fo <- paste(names(df)[1], "~",
+                    paste(names(df)[-c(1, p + 2)], collapse = " + "), "-1")
+        if (is.null(V)) {
+          model <-
+            nlme::gls(formula(fo), data = df, correlation = correlation)
+        }else{
+          model <-
+            MASS::lm.gls(formula(fo), data = df, W = V[i,j,,], inverse = TRUE)
+        }
+        
+        #       if(is.null(correlation)){
+        #        model <- nlme::gls(formula(fo), data = df)
+        #       }else{
+        #        model <- nlme::gls(formula(fo), data = df,
+        #                           correlation = do.call(get(correlation),
+        #                                                 c(corpar, form = ~1|groups)))
+        #       }
+        
+        mu_hat[i, j] <- t(w) %*% model$coefficients
+        
+        if (!is.null(correlation)) {
+          cM <- nlme::corMatrix(model$modelStruct$corStruct)
+          if (!is.list(cM))
+            cM <- list(cM)
+          invsqrtmOmega <-
+            Matrix::as.matrix(Matrix::bdiag(lapply(cM, invsqrtm)))
+          deR[i, j,] <- invsqrtmOmega %*% model$residuals
+          deR[i, j,] <- deR[i, j,] / sd(deR[i, j,])
+        } else if (!is.null(V)) {
+          deR[i, j,] <- chol(solve(V[i,j,,])) %*% model$residuals
+          deR[i, j,] <- deR[i, j,] / sd(deR[i, j,])
+          model$varBeta = solve(t(X) %*% solve(V[i,j,,], X))
+        }else{
+          deR[i, j,] <- model$residuals
+          deR[i, j,] <- deR[i, j,] / sd(deR[i, j,])
+        }
+        
+        vabs[i, j] <- sqrt(t(w) %*% model$varBeta %*% w)
+        
+        norm_est[i, j] <- (mu_hat[i, j] - level) / vabs[i, j]
       }
-
-      mu_hat[i, j] <- t(w) %*% model$coefficients
-      
-      if(!is.null(correlation)){
-        cM <- corMatrix(model$modelStruct$corStruct)
-        if(!is.list(cM)) cM <- list(cM)
-        invsqrtmOmega <- Matrix::as.matrix(Matrix::bdiag(lapply(cM, invsqrtm)))
-        deR[i, j, ] <- invsqrtmOmega %*% model$residuals 
-        deR[i, j, ] <- deR[i, j, ] / sd(deR[i, j, ])
-      } else{
-        deR[i, j, ] <- model$residuals 
-        deR[i, j, ] <- deR[i, j, ] / sd(deR[i, j, ])
-      }
-      
-      vabs[i, j] <- sqrt(t(w) %*% model$varBeta %*% w)
-      
-      norm_est[i, j] <- (mu_hat[i, j] - level) / vabs[i, j] 
+      # print(round(i / length(x) * 100))
     }
-    print(round(i / length(x) * 100))
   }
   
   #Ignore values not on mask.
@@ -266,7 +290,7 @@ PlotCope = function(cope,plot.taylor=FALSE, use.true.function = FALSE, map=FALSE
 #' n = 30
 #' Data = ToyNoise1(n = n)
 #' Data$z = Data$z + rep(ToySignal()$z, n)
-#' CopeSet = compute_cope(Data, level=4/3, mu=ToySignal()$z)
+#' CopeSet = ComputeCope(Data, level=4/3, mu=ToySignal()$z)
 #' plot(CopeSet)
 
 plot.cope = function(x, ..., taylor = FALSE, use.true.function = FALSE,
