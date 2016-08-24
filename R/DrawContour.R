@@ -7,6 +7,8 @@
 #' @param lty Line type for the contour.
 #' @return NULL
 #' @export
+#' @importFrom grDevices contourLines
+#' @importFrom graphics lines
 DrawContour<-function(...,level,col,lty=1){
   C<-contourLines(...,levels=level,nlevels=1)
   if(length(C) == 0) return()

@@ -51,6 +51,8 @@
 #'             excursion sets in asymptotically Gaussian
 #'             random fields, with an application to climate. Preprint, 2015. 
 #'        
+#' @importFrom stats formula sd quantile
+#' @importFrom grDevices contourLines
 #' @examples
 #' # An example using the ToyNoise and ToySignal of this package.
 #' n = 30
@@ -256,7 +258,6 @@ PlotCope = function(cope,plot.taylor=FALSE, use.true.function = FALSE, map=FALSE
   }
 }
 
-
 #' Plots CoPE sets. 
 #'
 #' @param x An object of class cope to be plotted.
@@ -278,8 +279,8 @@ PlotCope = function(cope,plot.taylor=FALSE, use.true.function = FALSE, map=FALSE
 #' @param ltym Type of contour line for \eqn{\hat{A}^{-}_c}.
 #' @param conlist A list of additional arguments to pass to the \code{contour} function.
 #'                By default, the contour labels are not shown.
-#' @import fields
-#' @importFrom graphics plot
+#' @importFrom fields image.plot
+#' @importFrom graphics contour
 #' @method plot cope
 #' @export
 #' @references M. Sommerfeld, S. Sain and A. Schwartzman. Confidence regions for 

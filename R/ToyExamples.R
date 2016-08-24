@@ -51,7 +51,10 @@ ToySlope <- function(ImRange = c(0, 1), NPixel = 64){
 
 #' Generate a realization of the Toy Noise 1.
 #'
-#'@param n The number of realizations to produce.
+#' @param n The number of realizations to produce.
+#' @param Ns Number of pixels of the result in one direction. The resulting
+#'               picture will have Ns x Ns pixels. 
+#' @importFrom stats arima.sim
 #' @return A list containing x and y, the coordinates of the grid and
 #'        z and array of dimensions c(64,64,n) giving n reallizations of the 
 #'        Toy Noise 1.
@@ -87,7 +90,9 @@ ToyNoise1 <- function(n = 1, Ns = 64, model = list(), theta = 0.1,
 
 #' Generate a realization of the Toy Noise 1 before smoothing.
 #'
-#'@param n The number of realizations to produce.
+#' @param n The number of realizations to produce.
+#' @param Ns Number of pixels of the result in one direction. The resulting
+#'               picture will have Ns x Ns pixels. 
 #' @return A list containing x and y, the coordinates of the grid and
 #'        z and array of dimensions c(64,64,n) giving n reallizations of the 
 #'        Toy Noise 1 before smoothing.
@@ -120,7 +125,10 @@ ToyNoise1Presmooth <- function(n = 1, Ns = 64, model = list(), theta = 0.1,
 
 #' Generate a realization of the Toy Noise 2.
 #'
-#'@param n The number of realizations to produce.
+#' @param n The number of realizations to produce.
+#' @param Ns Number of pixels of the result in one direction. The resulting
+#'               picture will have Ns x Ns pixels. 
+#' @importFrom stats arima.sim
 #' @return A list containing x and y, the coordinates of the grid and
 #'        z and array of dimensions c(64,64,n) giving n reallizations of the 
 #'        Toy Noise 2.
@@ -156,11 +164,12 @@ ToyNoise2 <- function(n = 1, Ns = 64, model = list(), theta = 0.1,
   list(x = s, y = s, z = tau * Z)
 }
 
-
-
 #' Generate a realization of the Toy Noise 3.
 #'
 #' @param n The number of realizations to produce.
+#' @param Ns Number of pixels of the result in one direction. The resulting
+#'               picture will have Ns x Ns pixels. 
+#' @importFrom stats rbinom arima.sim rexp
 #' @return A list containing x and y, the coordinates of the grid and
 #'        z and array of dimensions c(64,64,n) giving n reallizations of the 
 #'        Toy Noise 3.
@@ -194,7 +203,6 @@ ToyNoise3 <- function(n = 1, Ns = 64, model = list(), theta = 0.1,
                                      dx = ds, dy = ds, 
                                      kernel.function = laplaceker)$z
   }
-  
   
   if(n == 1) Z <- matrix(Z, Ns, Ns)
   list(x = s, y = s, z = tau * Z)

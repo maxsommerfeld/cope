@@ -9,6 +9,9 @@ ToyNoise3(n = 1, Ns = 64, model = list(), theta = 0.1, l1 = 1,
 }
 \arguments{
 \item{n}{The number of realizations to produce.}
+
+\item{Ns}{Number of pixels of the result in one direction. The resulting
+picture will have Ns x Ns pixels.}
 }
 \value{
 A list containing x and y, the coordinates of the grid and

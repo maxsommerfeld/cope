@@ -6,6 +6,7 @@
 #' @param cont The contour of f at value level
 #' @param R An array of dimension c(length(x),length(y),n) containing the 
 #'          realizations of the field.
+#' @importFrom stats na.omit pnorm
 #' @return A function g that computes for u>0 the probility that the supremum of
 #'         the field exceeds u. 
 TaylorContour = function(x, y, cont, R){

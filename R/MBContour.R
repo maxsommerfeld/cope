@@ -7,7 +7,7 @@
 #'          realizations of the field.
 #' @param cont The contours of f at value level
 #' @param N The number of Bootstrap realizations to produce. Default is 1000.
-
+#' @importFrom stats rnorm
 #' @return A vector of length N containing the Bootstrap realizations of the 
 #'         supremum. 
 MBContour = function(x, y, R, cont, N = 1000){
