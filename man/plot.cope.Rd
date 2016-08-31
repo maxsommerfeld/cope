@@ -48,11 +48,12 @@ Plots CoPE sets.
 }
 \examples{
 # An example using the ToyNoise and ToySignal of this package.
+\dontrun{
 n = 30
 Data = ToyNoise1(n = n)
 Data$z = Data$z + rep(ToySignal()$z, n)
 CopeSet = ComputeCope(Data, level=4/3, mu=ToySignal()$z)
-plot(CopeSet)
+plot(CopeSet)}
 }
 \references{
 M. Sommerfeld, S. Sain and A. Schwartzman. Confidence regions for 

@@ -3,7 +3,13 @@
 #' Computes CoPE sets for the data Y using the algorithm from Sommerfeld, Sain
 #' and Schwartzman (2015).
 #' 
-#' The \code{V} argument is a 4-dimensional array containing the covariance matrices associated with \code{Z$z}.  Specifically, \code{V[i,j,,]} is the covariance matrix of the data in \code{Z$z[i,j,]}.  If \code{V} is specified, then the covariance matrix in each element of the array is used to transform \code{X} and the appropriate element of \code{Z$z} before fitting the linear model.  This is used in place of estimating the covariance matrix withing the \code{nlme::gls} function.   
+#' The \code{V} argument is a 4-dimensional array containing the covariance 
+#' matrices associated with \code{Z$z}.  Specifically, \code{V[i,j,,]} is the 
+#' covariance matrix of the data in \code{Z$z[i,j,]}.  If \code{V} is specified, 
+#' then the covariance matrix in each element of the array is used to transform 
+#' \code{X} and the appropriate element of \code{Z$z} before fitting the linear 
+#' model.  This is used in place of estimating the covariance matrix withing the 
+#' \code{nlme::gls} function.   
 #'
 #' @param Z A list with components "x", "y" and "z". Here, x and y are the 
 #'          coordinates of the grid on which the data is observed and z is an 
@@ -55,11 +61,12 @@
 #' @importFrom grDevices contourLines
 #' @examples
 #' # An example using the ToyNoise and ToySignal of this package.
+#' \dontrun{
 #' n = 30
 #' Data = ToyNoise1(n = n)
 #' Data$z = Data$z + rep(ToySignal()$z, n)
 #' CopeSet = ComputeCope(Data,level=4/3, mu=ToySignal()$z)
-#' PlotCope(CopeSet)
+#' PlotCope(CopeSet)}
 ComputeCope = function(Z, level,
                 X=NULL,
                 w = NULL,
@@ -288,11 +295,12 @@ PlotCope = function(cope,plot.taylor=FALSE, use.true.function = FALSE, map=FALSE
 #'             random fields, with an application to climate. Preprint, 2015. 
 #' @examples
 #' # An example using the ToyNoise and ToySignal of this package.
+#' \dontrun{
 #' n = 30
 #' Data = ToyNoise1(n = n)
 #' Data$z = Data$z + rep(ToySignal()$z, n)
 #' CopeSet = ComputeCope(Data, level=4/3, mu=ToySignal()$z)
-#' plot(CopeSet)
+#' plot(CopeSet)}
 
 plot.cope = function(x, ..., taylor = FALSE, use.true.function = FALSE,
                      colc = "purple", lwdc = 3, ltyc = 1,
