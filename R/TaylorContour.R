@@ -29,6 +29,7 @@ TaylorContour = function(x, y, cont, R){
   
   #Gives the EC of one component.
   EC = function(X){
+    if(!is.matrix(X)) return(0) # Pathological cases.
     if(all(X[1,] == X[nrow(X),])) return(0)
     return(1)
   }
@@ -37,6 +38,7 @@ TaylorContour = function(x, y, cont, R){
   
   #Gives the length of one component.
   L = function(X){
+    if(!is.matrix(X)) return(0) # Pathological cases.
     if(nrow(X) == 1) return(0)
     X = X/sqrt(rowSums(X^2))
     sum(sqrt(rowSums(diff(X)^2)))
