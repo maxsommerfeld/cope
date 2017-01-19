@@ -5,7 +5,7 @@
 \title{Generate a realization of the Toy Noise 2.}
 \usage{
 ToyNoise2(n = 1, Ns = 64, model = list(), theta = 0.1, l1 = 1,
-  l2 = 4, tau = 50)
+  l2 = 4, tau = 40)
 }
 \arguments{
 \item{n}{The number of realizations to produce.}

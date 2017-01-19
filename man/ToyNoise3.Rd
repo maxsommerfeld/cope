@@ -4,8 +4,8 @@
 \alias{ToyNoise3}
 \title{Generate a realization of the Toy Noise 3.}
 \usage{
-ToyNoise3(n = 1, Ns = 64, model = list(), theta = 0.1, l1 = 1,
-  l2 = 4, tau = 25)
+ToyNoise3(n = 1, Ns = 64, model = list(), theta = 0.05, l1 = 1,
+  l2 = 4, tau = 10)
 }
 \arguments{
 \item{n}{The number of realizations to produce.}

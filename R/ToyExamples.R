@@ -30,6 +30,32 @@ ToySignal = function(ImRange = c(0,1), NPixel = 64){
   list(x=s,y=s,z=mu)
 } 
 
+#' Return the Toy Signal with discontinuities.
+#'
+#' @param ImRange A vector with two components giving the range of the region on
+#'               which the Toy Signal is to be computed.
+#' @param NPixel Number of pixels of the result in one direction. The resulting
+#'               picture will have NPixel x NPixel pixels.           
+#' @return A list with components "x", "y" and "z". Here, x and y are the 
+#'         coordinates of the grid and z is matrix of dimensions 
+#'         c(NPixel,NPixel) giving the Toy Signal.
+#' @export
+ToySignalDC = function(ImRange = c(0,1), NPixel = 64){
+  
+  N2 <- round(NPixel / 2)
+  
+  mu <- matrix(rep(seq(from = 0, to = 1, length.out = NPixel), NPixel), 
+                NPixel, NPixel)
+  mu2 <- matrix(rep(seq(from = 1/2, to = 3/4, length.out = N2), N2), N2, N2)
+  
+  startInd <- round(NPixel / 4)
+  mu[(startInd + 1):(startInd + N2), 
+      (startInd + 1):(startInd + N2)] <- mu2
+ 
+  s <- seq(from = ImRange[1], to = ImRange[2], length.out = NPixel)
+  list(x=s,y=s,z=mu)
+}
+
 #' The toy slope.
 #' 
 #' @param ImRange A vector with two components giving the range of the region on
@@ -54,6 +80,12 @@ ToySlope <- function(ImRange = c(0, 1), NPixel = 64){
 #' @param n The number of realizations to produce.
 #' @param Ns Number of pixels of the result in one direction. The resulting
 #'               picture will have Ns x Ns pixels. 
+#' @param model The correlation structure of the noise, as used by arima.sim.
+#'              Default is list() which gives i.i.d. noise.
+#' @param theta Bandwidth of kernel used to smooth the noise.
+#' @param l1, l2 Pixel size of the noise blocks in either side of the domain.
+#'               See main reference for details.
+#' @param tau Scaling factor with which noise is multiplied after generation.
 #' @importFrom stats arima.sim
 #' @return A list containing x and y, the coordinates of the grid and
 #'        z and array of dimensions c(64,64,n) giving n reallizations of the 
@@ -93,6 +125,12 @@ ToyNoise1 <- function(n = 1, Ns = 64, model = list(), theta = 0.1,
 #' @param n The number of realizations to produce.
 #' @param Ns Number of pixels of the result in one direction. The resulting
 #'               picture will have Ns x Ns pixels. 
+#' @param model The correlation structure of the noise, as used by arima.sim.
+#'              Default is list() which gives i.i.d. noise.
+#' @param theta Bandwidth of kernel used to smooth the noise.
+#' @param l1, l2 Pixel size of the noise blocks in either side of the domain.
+#'               See main reference for details.
+#' @param tau Scaling factor with which noise is multiplied after generation.
 #' @return A list containing x and y, the coordinates of the grid and
 #'        z and array of dimensions c(64,64,n) giving n reallizations of the 
 #'        Toy Noise 1 before smoothing.
@@ -128,13 +166,19 @@ ToyNoise1Presmooth <- function(n = 1, Ns = 64, model = list(), theta = 0.1,
 #' @param n The number of realizations to produce.
 #' @param Ns Number of pixels of the result in one direction. The resulting
 #'               picture will have Ns x Ns pixels. 
+#' @param model The correlation structure of the noise, as used by arima.sim.
+#'              Default is list() which gives i.i.d. noise.
+#' @param theta Bandwidth of kernel used to smooth the noise.
+#' @param l1, l2 Pixel size of the noise blocks in either side of the domain.
+#'               See main reference for details.
+#' @param tau Scaling factor with which noise is multiplied after generation.
 #' @importFrom stats arima.sim
 #' @return A list containing x and y, the coordinates of the grid and
 #'        z and array of dimensions c(64,64,n) giving n reallizations of the 
 #'        Toy Noise 2.
 #' @export
 ToyNoise2 <- function(n = 1, Ns = 64, model = list(), theta = 0.1,
-                      l1 = 1, l2 = 4, tau = 50){
+                      l1 = 1, l2 = 4, tau = 40){
   
   s <- seq(0, 1, length.out = Ns) # Grid coordinates.
   ds <- s[2] - s[1]
@@ -169,13 +213,19 @@ ToyNoise2 <- function(n = 1, Ns = 64, model = list(), theta = 0.1,
 #' @param n The number of realizations to produce.
 #' @param Ns Number of pixels of the result in one direction. The resulting
 #'               picture will have Ns x Ns pixels. 
+#' @param model The correlation structure of the noise, as used by arima.sim.
+#'              Default is list() which gives i.i.d. noise.
+#' @param theta Bandwidth of kernel used to smooth the noise.
+#' @param l1, l2 Pixel size of the noise blocks in either side of the domain.
+#'               See main reference for details.
+#' @param tau Scaling factor with which noise is multiplied after generation.
 #' @importFrom stats rbinom arima.sim rexp
 #' @return A list containing x and y, the coordinates of the grid and
 #'        z and array of dimensions c(64,64,n) giving n reallizations of the 
 #'        Toy Noise 3.
 #' @export
-ToyNoise3 <- function(n = 1, Ns = 64, model = list(), theta = 0.1,
-                      l1 = 1, l2 = 4, tau = 25){
+ToyNoise3 <- function(n = 1, Ns = 64, model = list(), theta = 0.05,
+                      l1 = 1, l2 = 4, tau = 10){
   
   s <- seq(0, 1, length.out = Ns) # Grid coordinates.
   ds <- s[2] - s[1]
@@ -185,12 +235,14 @@ ToyNoise3 <- function(n = 1, Ns = 64, model = list(), theta = 0.1,
   }
   
   Z1 <- matrix(n, Ns / (2 * l1), Ns / l1)
-  Z1 <- apply(Z1, 1:2, function(n){ arima.sim(n, model = model)})
+  Z1 <- apply(Z1, 1:2, function(n){ arima.sim(n, rand.gen = rlaplace,
+                                              model = model)})
   if(n > 1) Z1 <- aperm(Z1, c(2, 3, 1))
   Z1 <- kronecker(Z1, matrix(1, l1, l1))
   
   Z2 <- matrix(n, Ns / (2 * l2), Ns / l2)
-  Z2 <- apply(Z2, 1:2, function(n){arima.sim(n, model = model)})
+  Z2 <- apply(Z2, 1:2, function(n){arima.sim(n, rand.gen = rt, model = model, 
+                                             df = 10)})
   if(n > 1) Z2 <- aperm(Z2, c(2, 3, 1))
   Z2 <- kronecker(Z2, matrix(1, l2, l2))
   
@@ -207,3 +259,46 @@ ToyNoise3 <- function(n = 1, Ns = 64, model = list(), theta = 0.1,
   if(n == 1) Z <- matrix(Z, Ns, Ns)
   list(x = s, y = s, z = tau * Z)
 }
+
+#' Generate the AR coefficient map.
+#'
+#' @param Ns Number of pixels of the result in one direction. The resulting
+#'               picture will have Ns x Ns pixels. 
+#' @return A list containing x and y, the coordinates of the grid and
+#'        z, a matrix of dimensions Ns x Ns giving the AR coefficients map.
+#' @export
+ARCoeffMap <- function(Ns = 64){
+  
+  s <- seq(0, 1, length.out = Ns) # Grid coordinates.
+
+  # Parameters.
+  Z <- outer(s, s, 
+             FUN = function(x, y) qnorm(0.99 - 0.98 * (x + y) / 2, mean = 0.1, sd = 0.125))
+  
+  list(x = s, y = s, z = Z)
+}
+
+#' Generate an AR sequence with the ToyFUN as base noise and the AR coefficients
+#' given by the ARCoeffMap.
+#' 
+#' @param n Length of sequence.
+#' @param ... Additional parameters passed to ToyFUN.
+#' @return A list containing x and y, the coordinates of the grid and
+#'        z and array of dimensions c(64,64,n) giving n realizations of the 
+#'        Toy Noise.
+#' @export
+ToyNoiseMap <- function(n = 1, ToyFUN, ...){
+  Z <- get(ToyFUN)(n = n, ...)$z
+  Ns <- dim(Z)[1]
+  s <- seq(0, 1, length.out = Ns) # Grid coordinates.
+  
+  ARMap <- ARCoeffMap(Ns = Ns)$z
+  for(i in 1:Ns){
+    for(j in 1:Ns){
+      Z[i, j, ] <- arima.sim(n = n, model = list(ar = ARMap[i, j]),  
+                             innov = Z[i, j, ])
+    }
+  }
+  
+  list(x = s, y = s, z = Z)
+  }
