@@ -66,7 +66,13 @@ Computes CoPE sets for the data Y using the algorithm from Sommerfeld, Sain
 and Schwartzman (2015).
 }
 \details{
-The \code{V} argument is a 4-dimensional array containing the covariance matrices associated with \code{Z$z}.  Specifically, \code{V[i,j,,]} is the covariance matrix of the data in \code{Z$z[i,j,]}.  If \code{V} is specified, then the covariance matrix in each element of the array is used to transform \code{X} and the appropriate element of \code{Z$z} before fitting the linear model.  This is used in place of estimating the covariance matrix withing the \code{nlme::gls} function.
+The \code{V} argument is a 4-dimensional array containing the covariance 
+matrices associated with \code{Z$z}.  Specifically, \code{V[i,j,,]} is the 
+covariance matrix of the data in \code{Z$z[i,j,]}.  If \code{V} is specified, 
+then the covariance matrix in each element of the array is used to transform 
+\code{X} and the appropriate element of \code{Z$z} before fitting the linear 
+model.  This is used in place of estimating the covariance matrix withing the 
+\code{nlme::gls} function.
 }
 \examples{
 # An example using the ToyNoise and ToySignal of this package.

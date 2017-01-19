@@ -144,11 +144,11 @@ ComputeCope = function(Z, level,
         mu_hat[i, j] <- t(w) %*% model$coefficients
         
         if (!is.null(correlation)) {
-          cM <- nlme::corMatrix(model$modelStruct$corStruct)
+          cM <- nlme::corMatrix(model$modelStruct$corStruct, corr = F)
           if (!is.list(cM))
             cM <- list(cM)
           invsqrtmOmega <-
-            Matrix::as.matrix(Matrix::bdiag(lapply(cM, invsqrtm)))
+            Matrix::as.matrix(Matrix::bdiag(cM))
           deR[i, j,] <- invsqrtmOmega %*% model$residuals
           deR[i, j,] <- deR[i, j,] / sd(deR[i, j,])
         } else if (!is.null(V)) {
@@ -164,7 +164,6 @@ ComputeCope = function(Z, level,
         
         norm_est[i, j] <- (mu_hat[i, j] - level) / vabs[i, j]
       }
-      # print(round(i / length(x) * 100))
     }
   }
   
@@ -205,11 +204,23 @@ ComputeCope = function(Z, level,
   
   
   #Determine whether inclusion holds.
-  if(is.null(mu)){incl_MB = NA; incl_Tay = NA; incl_MB_true = NA; incl_Tay_true = NA} else{
-    incl_MB = SubsetContour(x,y,norm_est,a_MB,mu,level) & SubsetContour(x,y,mu,level,norm_est,-a_MB)
-    incl_Tay = SubsetContour(x,y,norm_est,a_Tay,mu,level) & SubsetContour(x,y,mu,level,norm_est,-a_Tay)
-    incl_MB_true = SubsetContour(x,y,norm_est,a_MB_true,mu,level) & SubsetContour(x,y,mu,level,norm_est,-a_MB_true)
-    incl_Tay_true = SubsetContour(x,y,norm_est,a_Tay_true,mu,level) & SubsetContour(x,y,mu,level,norm_est,-a_Tay_true)
+  # if(is.null(mu)){incl_MB = NA; incl_Tay = NA; incl_MB_true = NA; incl_Tay_true = NA} else{
+  #   incl_MB = SubsetContour(x,y,norm_est,a_MB,mu,level) & SubsetContour(x,y,mu,level,norm_est,-a_MB)
+  #   incl_Tay = SubsetContour(x,y,norm_est,a_Tay,mu,level) & SubsetContour(x,y,mu,level,norm_est,-a_Tay)
+  #   incl_MB_true = SubsetContour(x,y,norm_est,a_MB_true,mu,level) & SubsetContour(x,y,mu,level,norm_est,-a_MB_true)
+  #   incl_Tay_true = SubsetContour(x,y,norm_est,a_Tay_true,mu,level) & SubsetContour(x,y,mu,level,norm_est,-a_Tay_true)
+  # }
+  
+  incl <- function(A, B){
+    min(B - A) >= 0
+  }
+  
+    if(is.null(mu)){incl_MB = NA; incl_Tay = NA; incl_MB_true = NA; incl_Tay_true = NA} else{
+      Ac <- mu >= level
+    incl_MB <- incl(norm_est >= a_MB, Ac) & incl(Ac, norm_est >= - a_MB)
+    incl_Tay <- incl(norm_est >= a_Tay, Ac) & incl(Ac, norm_est >= - a_Tay)
+    incl_MB_true <- incl(norm_est >= a_MB_true, Ac) & incl(Ac, norm_est >= - a_MB_true)
+    incl_Tay_true <- incl(norm_est >= a_Tay_true, Ac) & incl(Ac, norm_est >= - a_Tay_true)
   }
   
   result = structure(
@@ -249,16 +260,17 @@ PlotCope = function(cope,plot.taylor=FALSE, use.true.function = FALSE, map=FALSE
   if(use.true.function & !is.null(cope$mu)){
     if(plot.taylor) a = cope$a_Tay_true else a = cope$a_MB_true
     plot.function(x,y,cope$mu_hat,horizontal=FALSE, mask=cope$mask, ...)
-    DrawContour(x,y,cope$mu,level=cope$level,col="purple")
+    DrawContour(x,y,cope$mu,level=cope$level,col="purple", lty = 2)
     DrawContour(x,y,cope$norm_est,level=a,col="darkred")
     DrawContour(x,y,cope$norm_est,level=-a,col="darkgreen")
   } else{
     if(plot.taylor) a = cope$a_Tay else a = cope$a_MB
     plot.function(x,y,cope$mu_hat,horizontal=FALSE, mask=cope$mask, ...)
     if(!is.null(cope$mu)){
-      DrawContour(x,y,cope$mu,level=cope$level,col="purple")
+      DrawContour(x,y,cope$mu,level=cope$level,col="purple", lty = 2)
+      DrawContour(x,y,cope$mu_hat,level=cope$level,col="purple", lty = 1)
     } else{
-      DrawContour(x,y,cope$mu_hat,level=cope$level,col="purple")
+      DrawContour(x,y,cope$mu_hat,level=cope$level,col="purple", lty = 1)
     }
     DrawContour(x,y,cope$norm_est,level=a,col="darkred")
     DrawContour(x,y,cope$norm_est,level=-a,col="darkgreen")
