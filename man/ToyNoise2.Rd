@@ -12,6 +12,16 @@ ToyNoise2(n = 1, Ns = 64, model = list(), theta = 0.1, l1 = 1,
 
 \item{Ns}{Number of pixels of the result in one direction. The resulting
 picture will have Ns x Ns pixels.}
+
+\item{model}{The correlation structure of the noise, as used by arima.sim.
+Default is list() which gives i.i.d. noise.}
+
+\item{theta}{Bandwidth of kernel used to smooth the noise.}
+
+\item{l1, }{l2 Pixel size of the noise blocks in either side of the domain.
+See main reference for details.}
+
+\item{tau}{Scaling factor with which noise is multiplied after generation.}
 }
 \value{
 A list containing x and y, the coordinates of the grid and
