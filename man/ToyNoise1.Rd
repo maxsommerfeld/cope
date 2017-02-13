@@ -18,7 +18,7 @@ Default is list() which gives i.i.d. noise.}
 
 \item{theta}{Bandwidth of kernel used to smooth the noise.}
 
-\item{l1, }{l2 Pixel size of the noise blocks in either side of the domain.
+\item{l1, l2}{Pixel size of the noise blocks in either side of the domain.
 See main reference for details.}
 
 \item{tau}{Scaling factor with which noise is multiplied after generation.}

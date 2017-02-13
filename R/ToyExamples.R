@@ -83,7 +83,7 @@ ToySlope <- function(ImRange = c(0, 1), NPixel = 64){
 #' @param model The correlation structure of the noise, as used by arima.sim.
 #'              Default is list() which gives i.i.d. noise.
 #' @param theta Bandwidth of kernel used to smooth the noise.
-#' @param l1, l2 Pixel size of the noise blocks in either side of the domain.
+#' @param l1,l2 Pixel size of the noise blocks in either side of the domain.
 #'               See main reference for details.
 #' @param tau Scaling factor with which noise is multiplied after generation.
 #' @importFrom stats arima.sim
@@ -128,7 +128,7 @@ ToyNoise1 <- function(n = 1, Ns = 64, model = list(), theta = 0.1,
 #' @param model The correlation structure of the noise, as used by arima.sim.
 #'              Default is list() which gives i.i.d. noise.
 #' @param theta Bandwidth of kernel used to smooth the noise.
-#' @param l1, l2 Pixel size of the noise blocks in either side of the domain.
+#' @param l1,l2 Pixel size of the noise blocks in either side of the domain.
 #'               See main reference for details.
 #' @param tau Scaling factor with which noise is multiplied after generation.
 #' @return A list containing x and y, the coordinates of the grid and
@@ -169,7 +169,7 @@ ToyNoise1Presmooth <- function(n = 1, Ns = 64, model = list(), theta = 0.1,
 #' @param model The correlation structure of the noise, as used by arima.sim.
 #'              Default is list() which gives i.i.d. noise.
 #' @param theta Bandwidth of kernel used to smooth the noise.
-#' @param l1, l2 Pixel size of the noise blocks in either side of the domain.
+#' @param l1,l2 Pixel size of the noise blocks in either side of the domain.
 #'               See main reference for details.
 #' @param tau Scaling factor with which noise is multiplied after generation.
 #' @importFrom stats arima.sim
@@ -216,7 +216,7 @@ ToyNoise2 <- function(n = 1, Ns = 64, model = list(), theta = 0.1,
 #' @param model The correlation structure of the noise, as used by arima.sim.
 #'              Default is list() which gives i.i.d. noise.
 #' @param theta Bandwidth of kernel used to smooth the noise.
-#' @param l1, l2 Pixel size of the noise blocks in either side of the domain.
+#' @param l1,l2 Pixel size of the noise blocks in either side of the domain.
 #'               See main reference for details.
 #' @param tau Scaling factor with which noise is multiplied after generation.
 #' @importFrom stats rbinom arima.sim rexp
@@ -241,7 +241,7 @@ ToyNoise3 <- function(n = 1, Ns = 64, model = list(), theta = 0.05,
   Z1 <- kronecker(Z1, matrix(1, l1, l1))
   
   Z2 <- matrix(n, Ns / (2 * l2), Ns / l2)
-  Z2 <- apply(Z2, 1:2, function(n){arima.sim(n, rand.gen = rt, model = model, 
+  Z2 <- apply(Z2, 1:2, function(n){arima.sim(n, rand.gen = stats::rt, model = model, 
                                              df = 10)})
   if(n > 1) Z2 <- aperm(Z2, c(2, 3, 1))
   Z2 <- kronecker(Z2, matrix(1, l2, l2))
@@ -273,7 +273,7 @@ ARCoeffMap <- function(Ns = 64){
 
   # Parameters.
   Z <- outer(s, s, 
-             FUN = function(x, y) qnorm(0.99 - 0.98 * (x + y) / 2, mean = 0.1, sd = 0.125))
+             FUN = function(x, y) stats::qnorm(0.99 - 0.98 * (x + y) / 2, mean = 0.1, sd = 0.125))
   
   list(x = s, y = s, z = Z)
 }
@@ -282,6 +282,7 @@ ARCoeffMap <- function(Ns = 64){
 #' given by the ARCoeffMap.
 #' 
 #' @param n Length of sequence.
+#' @param ToyFUN Base noise to build the sequence from.
 #' @param ... Additional parameters passed to ToyFUN.
 #' @return A list containing x and y, the coordinates of the grid and
 #'        z and array of dimensions c(64,64,n) giving n realizations of the 

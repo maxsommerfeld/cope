@@ -10,6 +10,8 @@ ToyNoiseMap(n = 1, ToyFUN, ...)
 \arguments{
 \item{n}{Length of sequence.}
 
+\item{ToyFUN}{Base noise to build the sequence from.}
+
 \item{...}{Additional parameters passed to ToyFUN.}
 }
 \value{
